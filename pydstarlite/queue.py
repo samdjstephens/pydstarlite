@@ -11,5 +11,11 @@ class PriorityQueue:
     def put(self, item, priority):
         heapq.heappush(self.elements, (priority, item))
 
-    def get(self):
+    def pop(self):
         return heapq.heappop(self.elements)[1]
+
+    def first_key(self):
+        return heapq.nsmallest(1, self.elements)[0][0]
+
+    def delete(self, node):
+        self.elements = [e for e in self.elements if e[1] != node]

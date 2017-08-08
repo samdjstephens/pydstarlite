@@ -6,7 +6,6 @@
 
 
 # utility functions for dealing with square grids
-from __future__ import print_function, unicode_literals
 from pydstarlite.grid import GridWithWeights
 from pydstarlite.queue import PriorityQueue
 
@@ -86,7 +85,7 @@ def a_star_search(graph, start, goal):
     cost_so_far[start] = 0
 
     while not frontier.empty():
-        current = frontier.get()
+        current = frontier.pop()
 
         if current == goal:
             break
@@ -100,3 +99,56 @@ def a_star_search(graph, start, goal):
                 came_from[next] = current
 
     return came_from, cost_so_far
+
+
+
+def lpa_star_search(graph, start, goal):
+    G_VALS = {}
+    # TODO: Cache the RHS vals in a dict like G_VALS?
+    def rhs(node):
+        if node == start:
+            return 0
+        else:
+            return min([
+                g(n) + graph.cost(n, node) for n in graph.neighbors(node)
+            ])
+
+    def g(node):
+        return G_VALS.get(node, float('inf'))
+
+    def calculate_key(node):
+        return (
+            min([
+                g(node), rhs(node) + heuristic(node, goal)
+            ]),
+            min([
+                g(node), rhs(node)
+            ])
+        )
+
+    def update_node(node):
+        frontier.delete(node)
+        if g(node) != rhs(node):
+            frontier.put(node, calculate_key(node))
+
+    def update_nodes(nodes):
+        [update_node(n) for n in nodes]
+
+    frontier = PriorityQueue()
+    back_pointers = {}
+
+    # Initialise
+    frontier.put(start, calculate_key(start))
+    back_pointers[start] = None
+
+    while frontier.first_key() < calculate_key(goal) or rhs(goal) != g(goal):
+        node = frontier.pop()
+
+        if g(node) > rhs(node):
+            G_VALS[node] = rhs(node)
+            update_nodes(graph.neighbors(node))
+        else:
+            G_VALS[node] = float('inf')
+            update_nodes(graph.neighbors(node) + [node])
+
+    return back_pointers.copy(), G_VALS.copy()
