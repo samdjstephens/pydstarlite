@@ -104,33 +104,35 @@ def a_star_search(graph, start, goal):
 
 def lpa_star_search(graph, start, goal):
     G_VALS = {}
+    RHS_VALS = {}
     # TODO: Cache the RHS vals in a dict like G_VALS?
-    def rhs(node):
+    def calculate_rhs(node):
         def lookahead_cost(lowest_cost_neighbour):
             return g(lowest_cost_neighbour) + graph.cost(lowest_cost_neighbour, node)
 
-        if node == start:
-            return 0
-        else:
-            lowest_cost_neighbour = min(graph.neighbors(node), key=lookahead_cost)
-            back_pointers[node] = lowest_cost_neighbour
-            return lookahead_cost(lowest_cost_neighbour)
+        lowest_cost_neighbour = min(graph.neighbors(node), key=lookahead_cost)
+        back_pointers[node] = lowest_cost_neighbour
+        return lookahead_cost(lowest_cost_neighbour)
+
+    def rhs(node):
+        return RHS_VALS.get(node, float('inf')) if node != start else 0
 
     def g(node):
         return G_VALS.get(node, float('inf'))
 
     def calculate_key(node):
-        RHS = rhs(node)
         return (
             min([
-                g(node), RHS + heuristic(node, goal)
-            ]),
+                g(node), rhs(node)
+            ]) + heuristic(node, goal),
             min([
-                g(node), RHS
+                g(node), rhs(node)
             ])
         )
 
     def update_node(node):
+        if node != start:
+            RHS_VALS[node] = calculate_rhs(node)
         frontier.delete(node)
         if g(node) != rhs(node):
             frontier.put(node, calculate_key(node))
