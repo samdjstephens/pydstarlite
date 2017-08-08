@@ -6,7 +6,7 @@
 
 
 # utility functions for dealing with square grids
-from pydstarlite.grid import GridWithWeights
+from pydstarlite.grid import GridWithWeights, SquareGrid, grid_from_string
 from pydstarlite.queue import PriorityQueue
 
 
@@ -50,13 +50,27 @@ DIAGRAM1_WALLS = [from_id_width(id, width=30) for id in
 
 diagram4 = GridWithWeights(10, 10)
 diagram4.walls = [(1, 7), (1, 8), (2, 7), (2, 8), (3, 7), (3, 8)]
-diagram4.weights = {loc: 5 for loc in [(3, 4), (3, 5), (4, 1), (4, 2),
+diagram4.weights = {loc: 1 for loc in [(3, 4), (3, 5), (4, 1), (4, 2),
                                        (4, 3), (4, 4), (4, 5), (4, 6),
                                        (4, 7), (4, 8), (5, 1), (5, 2),
                                        (5, 3), (5, 4), (5, 5), (5, 6),
                                        (5, 7), (5, 8), (6, 2), (6, 3),
                                        (6, 4), (6, 5), (6, 6), (6, 7),
                                        (7, 3), (7, 4), (7, 5)]}
+
+
+diagram5 = grid_from_string("""
+..........
+..........
+..........
+...######.
+...#......
+...#......
+...#......
+.###......
+.###......
+..........
+""")
 
 
 def reconstruct_path(came_from, start, goal):
@@ -105,7 +119,7 @@ def a_star_search(graph, start, goal):
 def lpa_star_search(graph, start, goal):
     G_VALS = {}
     RHS_VALS = {}
-    # TODO: Cache the RHS vals in a dict like G_VALS?
+
     def calculate_rhs(node):
         def lookahead_cost(lowest_cost_neighbour):
             return g(lowest_cost_neighbour) + graph.cost(lowest_cost_neighbour, node)
@@ -121,13 +135,11 @@ def lpa_star_search(graph, start, goal):
         return G_VALS.get(node, float('inf'))
 
     def calculate_key(node):
+        g_rhs = min([g(node), rhs(node)])
+
         return (
-            min([
-                g(node), rhs(node)
-            ]) + heuristic(node, goal),
-            min([
-                g(node), rhs(node)
-            ])
+            g_rhs + heuristic(node, goal),
+            g_rhs
         )
 
     def update_node(node):

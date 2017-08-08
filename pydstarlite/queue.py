@@ -19,3 +19,7 @@ class PriorityQueue:
 
     def delete(self, node):
         self.elements = [e for e in self.elements if e[1] != node]
+
+    def __iter__(self):
+        for key, node in self.elements:
+            yield node
