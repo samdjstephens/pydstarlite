@@ -106,23 +106,27 @@ def lpa_star_search(graph, start, goal):
     G_VALS = {}
     # TODO: Cache the RHS vals in a dict like G_VALS?
     def rhs(node):
+        def lookahead_cost(lowest_cost_neighbour):
+            return g(lowest_cost_neighbour) + graph.cost(lowest_cost_neighbour, node)
+
         if node == start:
             return 0
         else:
-            return min([
-                g(n) + graph.cost(n, node) for n in graph.neighbors(node)
-            ])
+            lowest_cost_neighbour = min(graph.neighbors(node), key=lookahead_cost)
+            back_pointers[node] = lowest_cost_neighbour
+            return lookahead_cost(lowest_cost_neighbour)
 
     def g(node):
         return G_VALS.get(node, float('inf'))
 
     def calculate_key(node):
+        RHS = rhs(node)
         return (
             min([
-                g(node), rhs(node) + heuristic(node, goal)
+                g(node), RHS + heuristic(node, goal)
             ]),
             min([
-                g(node), rhs(node)
+                g(node), RHS
             ])
         )
 
