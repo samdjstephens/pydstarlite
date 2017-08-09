@@ -6,8 +6,8 @@
 
 
 # utility functions for dealing with square grids
-from pydstarlite.grid import GridWithWeights, SquareGrid, grid_from_string
-from pydstarlite.queue import PriorityQueue
+from pydstarlite.grid import GridWithWeights, grid_from_string
+from pydstarlite.priority_queue import PriorityQueue
 
 
 def from_id_width(id, width):
@@ -121,7 +121,7 @@ def a_star_search(graph, start, goal):
 
 
 
-def lpa_star_search(graph, start, goal):
+def lpa_star_search(graph, start, goal, incremental=False):
     G_VALS = {}
     RHS_VALS = {}
 
@@ -173,5 +173,8 @@ def lpa_star_search(graph, start, goal):
         else:
             G_VALS[node] = float('inf')
             update_nodes(graph.neighbors(node) + [node])
+
+        if incremental:
+            yield G_VALS
 
     return back_pointers.copy(), G_VALS.copy()
