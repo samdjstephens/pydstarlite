@@ -8,18 +8,17 @@ class SquareGrid:
         (x, y) = id
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def passable(self, id):
-        return id not in self.walls
-
     def cost(self, from_node, to_node):
-        return 1
+        if from_node in self.walls or to_node in self.walls:
+            return float('inf')
+        else:
+            return 1
 
     def neighbors(self, id):
         (x, y) = id
         results = [(x + 1, y), (x, y - 1), (x - 1, y), (x, y + 1)]
         if (x + y) % 2 == 0: results.reverse()  # aesthetics
         results = filter(self.in_bounds, results)
-        results = filter(self.passable, results)
         return results
 
 
