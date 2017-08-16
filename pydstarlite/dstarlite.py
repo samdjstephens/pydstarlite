@@ -1,14 +1,18 @@
 from pydstarlite.priority_queue import PriorityQueue
+from pydstarlite.grid import AgentViewGrid, SquareGrid
 
 
 class DStarLite(object):
     def __init__(self, graph, start, goal):
-        self.graph = graph
+        # Init the graphs
+        self.graph = AgentViewGrid(graph.width, graph.height)
+        self.real_graph: SquareGrid = graph
+
         self.back_pointers = {}
         self.G_VALS = {}
         self.RHS_VALS = {}
         self.Km = 0
-        self.start = start
+        self.position = start
         self.goal = goal
         self.frontier = PriorityQueue()
         self.frontier.put(self.goal, self.calculate_key(self.goal))
@@ -37,7 +41,7 @@ class DStarLite(object):
         g_rhs = min([self.g(node), self.rhs(node)])
 
         return (
-            g_rhs + self.heuristic(node, self.start) + self.Km,
+            g_rhs + self.heuristic(node, self.position) + self.Km,
             g_rhs
         )
 
@@ -53,7 +57,7 @@ class DStarLite(object):
 
     def compute_shortest_path(self):
 
-        while self.frontier.first_key() < self.calculate_key(self.start) or self.rhs(self.start) != self.g(self.start):
+        while self.frontier.first_key() < self.calculate_key(self.position) or self.rhs(self.position) != self.g(self.position):
             k_old = self.frontier.first_key()
             node = self.frontier.pop()
             k_new = self.calculate_key(node)
@@ -69,23 +73,32 @@ class DStarLite(object):
         return self.back_pointers.copy(), self.G_VALS.copy()
 
     def move_to_goal(self):
-        self.compute_shortest_path()
-        last_node = self.start
-        yield self.start
-        while self.start != self.goal:
-            # if self.g(self.start) == float('inf'):
-            #     raise Exception("No path")
+        observation = self.real_graph.observe(self.position)
+        walls = self.graph.new_walls(observation)
+        self.graph.update_walls(walls)
 
-            self.start = self.lowest_cost_neighbour(self.start)
-            # check graph for any edge-cost changes
-            graph_changed = False
-            if graph_changed:
-                self.Km += self.heuristic(last_node, self.start)
-                last_node = self.start
-                #update the edge costs
-                #Update affected nodes: self.update_node(node)
-                self.compute_shorted_path()
-            yield self.start
+        self.compute_shortest_path()
+        last_node = self.position
+
+        yield self.position, observation, self.graph.walls
+
+        while self.position != self.goal:
+            if self.g(self.position) == float('inf'):
+                raise Exception("No path")
+
+            self.position = self.lowest_cost_neighbour(self.position)
+            observation = self.real_graph.observe(self.position)
+            new_walls = self.graph.new_walls(observation)
+
+            if new_walls:
+                self.graph.update_walls(new_walls)
+                self.Km += self.heuristic(last_node, self.position)
+                last_node = self.position
+                self.update_nodes({node for wallnode in new_walls
+                                   for node in self.graph.neighbors(wallnode)
+                                   if node not in self.graph.walls})
+                self.compute_shortest_path()
+            yield self.position, observation, self.graph.walls
 
 
     def lowest_cost_neighbour(self, node):
