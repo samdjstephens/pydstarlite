@@ -1,4 +1,6 @@
 from pydstarlite.implementation import *
+from pydstarlite.lpa_star import lpa_star_search
+
 
 def run_both_with_grid(grid, start, goal):
     came_from, cost_so_far = lpa_star_search(grid, start, goal)

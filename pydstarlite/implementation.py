@@ -69,11 +69,11 @@ diagram5 = grid_from_string("""
 ...######.
 ........#.
 ...######.
-...#......
-...#......
-...#......
-.###......
-####......
+...#....#.
+...#....#.
+...#....#.
+.###....#.
+.###....#.
 ..........
 """)
 
@@ -121,60 +121,3 @@ def a_star_search(graph, start, goal):
 
 
 
-def lpa_star_search(graph, start, goal, incremental=False):
-    G_VALS = {}
-    RHS_VALS = {}
-
-    def calculate_rhs(node):
-        def lookahead_cost(lowest_cost_neighbour):
-            return g(lowest_cost_neighbour) + graph.cost(lowest_cost_neighbour, node)
-
-        lowest_cost_neighbour = min(graph.neighbors(node), key=lookahead_cost)
-        back_pointers[node] = lowest_cost_neighbour
-        return lookahead_cost(lowest_cost_neighbour)
-
-    def rhs(node):
-        return RHS_VALS.get(node, float('inf')) if node != start else 0
-
-    def g(node):
-        return G_VALS.get(node, float('inf'))
-
-    def calculate_key(node):
-        g_rhs = min([g(node), rhs(node)])
-
-        return (
-            g_rhs + heuristic(node, goal),
-            g_rhs
-        )
-
-    def update_node(node):
-        if node != start:
-            RHS_VALS[node] = calculate_rhs(node)
-        frontier.delete(node)
-        if g(node) != rhs(node):
-            frontier.put(node, calculate_key(node))
-
-    def update_nodes(nodes):
-        [update_node(n) for n in nodes]
-
-    frontier = PriorityQueue()
-    back_pointers = {}
-
-    # Initialise
-    frontier.put(start, calculate_key(start))
-    back_pointers[start] = None
-
-    while frontier.first_key() < calculate_key(goal) or rhs(goal) != g(goal):
-        node = frontier.pop()
-
-        if g(node) > rhs(node):
-            G_VALS[node] = rhs(node)
-            update_nodes(graph.neighbors(node))
-        else:
-            G_VALS[node] = float('inf')
-            update_nodes(graph.neighbors(node) + [node])
-
-        if incremental:
-            yield G_VALS
-
-    return back_pointers.copy(), G_VALS.copy()
