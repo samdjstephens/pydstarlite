@@ -50,7 +50,7 @@ class LPAStar(object):
     def update_nodes(self, nodes):
         [self.update_node(n) for n in nodes]
 
-    def compute_shorted_path(self, incremental=False):
+    def compute_shortest_path(self):
 
         while self.frontier.first_key() < self.calculate_key(self.goal) or self.rhs(self.goal) != self.g(self.goal):
             node = self.frontier.pop()
@@ -61,8 +61,5 @@ class LPAStar(object):
             else:
                 self.G_VALS[node] = float('inf')
                 self.update_nodes(self.graph.neighbors(node) + [node])
-
-            if incremental:
-                yield self.G_VALS
 
         return self.back_pointers.copy(), self.G_VALS.copy()
