@@ -1,5 +1,7 @@
+from collections import deque
+
 from pydstarlite.priority_queue import PriorityQueue
-from pydstarlite.grid import AgentViewGrid, SquareGrid
+from pydstarlite.grid import AgentViewGrid, SquareGrid, grid_from_string
 
 
 class DStarLite(object):
@@ -56,10 +58,13 @@ class DStarLite(object):
         [self.update_node(n) for n in nodes]
 
     def compute_shortest_path(self):
-
+        last_nodes = deque(maxlen=10)
         while self.frontier.first_key() < self.calculate_key(self.position) or self.rhs(self.position) != self.g(self.position):
             k_old = self.frontier.first_key()
             node = self.frontier.pop()
+            last_nodes.append(node)
+            if len(last_nodes) == 10 and len(set(last_nodes)) < 3:
+                raise Exception("Fail! Stuck in a loop")
             k_new = self.calculate_key(node)
             if k_old < k_new:
                 self.frontier.put(node, k_new)
@@ -100,10 +105,27 @@ class DStarLite(object):
                 self.compute_shortest_path()
             yield self.position, observation, self.graph.walls
 
-
     def lowest_cost_neighbour(self, node):
         """TODO: Refactor above to use this"""
         def lookahead_cost(neighbour):
             return self.g(neighbour) + self.graph.cost(neighbour, node)
 
         return min(self.graph.neighbors(node), key=lookahead_cost)
+
+
+if __name__ == "__main__":
+    GRAPH, START, END = grid_from_string("""
+    ..........
+    ...######.
+    .......A#.
+    ...######.
+    ...#....#.
+    ...#....#.
+    ........#.
+    ........#.
+    ........#Z
+    ........#.
+    """)
+    dstar = DStarLite(GRAPH, START, END)
+    for p, o, w in dstar.move_to_goal():
+        pass

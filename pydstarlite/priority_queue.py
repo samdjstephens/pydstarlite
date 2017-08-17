@@ -12,13 +12,15 @@ class PriorityQueue:
         heapq.heappush(self.elements, (priority, item))
 
     def pop(self):
-        return heapq.heappop(self.elements)[1]
+        item = heapq.heappop(self.elements)
+        return item[1]
 
     def first_key(self):
         return heapq.nsmallest(1, self.elements)[0][0]
 
     def delete(self, node):
         self.elements = [e for e in self.elements if e[1] != node]
+        heapq.heapify(self.elements)
 
     def __iter__(self):
         for key, node in self.elements:
