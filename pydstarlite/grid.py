@@ -33,6 +33,7 @@ class SquareGrid:
 
 
 class AgentViewGrid(SquareGrid):
+
     def new_walls(self, observation):
         walls_in_obs = {node for node, nodetype in observation.items()
                         if nodetype == WALL}

@@ -5,10 +5,11 @@ from pydstarlite.grid import AgentViewGrid, SquareGrid, grid_from_string
 
 
 class DStarLite(object):
-    def __init__(self, graph, start, goal):
+    def __init__(self, graph, start, goal, view_range=2):
         # Init the graphs
         self.graph = AgentViewGrid(graph.width, graph.height)
         self.real_graph: SquareGrid = graph
+        self.view_range = view_range
 
         self.back_pointers = {}
         self.G_VALS = {}
@@ -78,7 +79,7 @@ class DStarLite(object):
         return self.back_pointers.copy(), self.G_VALS.copy()
 
     def move_to_goal(self):
-        observation = self.real_graph.observe(self.position)
+        observation = self.real_graph.observe(self.position, self.view_range)
         walls = self.graph.new_walls(observation)
         self.graph.update_walls(walls)
 
@@ -92,7 +93,7 @@ class DStarLite(object):
                 raise Exception("No path")
 
             self.position = self.lowest_cost_neighbour(self.position)
-            observation = self.real_graph.observe(self.position)
+            observation = self.real_graph.observe(self.position, self.view_range)
             new_walls = self.graph.new_walls(observation)
 
             if new_walls:
