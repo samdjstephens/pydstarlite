@@ -43,16 +43,6 @@ class AgentViewGrid(SquareGrid):
         self.walls.update(new_walls)
 
 
-
-class GridWithWeights(SquareGrid):
-    def __init__(self, width, height):
-        SquareGrid.__init__(self, width, height)
-        self.weights = {}
-
-    def cost(self, from_node, to_node):
-        return self.weights.get(to_node, 1)
-
-
 def grid_from_string(string):
     lines = [l.strip() for l in string.split('\n') if l.strip()]
     grid = SquareGrid(len(lines[0]), len(lines))

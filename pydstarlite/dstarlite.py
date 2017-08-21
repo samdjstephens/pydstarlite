@@ -1,5 +1,6 @@
 from collections import deque
 
+from pydstarlite.utility import draw_grid
 from pydstarlite.priority_queue import PriorityQueue
 from pydstarlite.grid import AgentViewGrid, SquareGrid, grid_from_string
 
@@ -128,5 +129,9 @@ if __name__ == "__main__":
     ........#.
     """)
     dstar = DStarLite(GRAPH, START, END)
-    for p, o, w in dstar.move_to_goal():
-        pass
+    path = [p for p, o, w in dstar.move_to_goal()]
+
+    print("The graph (A=Start, Z=Goal)")
+    draw_grid(GRAPH, width=3, start=START, goal=END)
+    print("\n\nPath taken (@ symbols)")
+    draw_grid(GRAPH, width=3, path=path)
