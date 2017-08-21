@@ -2,7 +2,8 @@ from collections import deque
 
 from pydstarlite.utility import draw_grid
 from pydstarlite.priority_queue import PriorityQueue
-from pydstarlite.grid import AgentViewGrid, SquareGrid, grid_from_string
+from pydstarlite.grid import AgentViewGrid, SquareGrid
+from pydstarlite.utility import grid_from_string
 
 
 class DStarLite(object):

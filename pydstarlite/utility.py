@@ -6,6 +6,7 @@
 
 
 # utility functions for dealing with square grids
+from pydstarlite import grid
 from pydstarlite.priority_queue import PriorityQueue
 
 
@@ -44,6 +45,50 @@ def draw_grid(graph, width=2, **style):
         print()
 
 
+def reconstruct_path(came_from, start, goal):
+    """Reconstruct a shortest path from a dictionary of back-pointers"""
+    current = goal
+    path = [current]
+    while current != start:
+        current = came_from[current]
+        path.append(current)
+    path.append(start)  # optional
+    path.reverse()  # optional
+    return path
+
+
+def grid_from_string(string):
+    """
+    Construct a SquareGrid from a string representation
+
+    Representation:
+    . - a passable square
+    A - the start position
+    Z - the goal position
+    # - an unpassable square (a wall)
+
+    Args:
+        :type string: str
+
+    Returns a 3-tuple: (g: SquareGrid, start: Tuple, end: Tuple)
+
+    """
+    assert string.count('A') == 1, "Cant have more than 1 start position!"
+    assert string.count('Z') == 1, "Cant have more than 1 end position!"
+    lines = [l.strip() for l in string.split('\n') if l.strip()]
+    g = grid.SquareGrid(len(lines[0]), len(lines))
+    start, end = None, None
+    for row, line in enumerate(lines):
+        for col, char in enumerate(line):
+            if char == grid.WALL:
+                g.walls.add((col, row))
+            if char == 'A':
+                start = (col, row)
+            if char == 'Z':
+                end = (col, row)
+    assert start is not None
+    assert end is not None
+    return g, start, end
 
 def heuristic(a, b):
     (x1, y1) = a

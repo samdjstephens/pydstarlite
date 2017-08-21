@@ -42,19 +42,3 @@ class AgentViewGrid(SquareGrid):
     def update_walls(self, new_walls):
         self.walls.update(new_walls)
 
-
-def grid_from_string(string):
-    lines = [l.strip() for l in string.split('\n') if l.strip()]
-    grid = SquareGrid(len(lines[0]), len(lines))
-    start, end = None, None
-    for row, line in enumerate(lines):
-        for col, char in enumerate(line):
-            if char == WALL:
-                grid.walls.add((col, row))
-            if char == 'A':
-                start = (col, row)
-            if char == 'Z':
-                end = (col, row)
-    assert start is not None
-    assert end is not None
-    return grid, start, end
