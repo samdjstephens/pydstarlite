@@ -1,4 +1,5 @@
 from collections import deque
+from functools import partial
 
 from pydstarlite.utility import draw_grid
 from pydstarlite.priority_queue import PriorityQueue
@@ -24,12 +25,16 @@ class DStarLite(object):
         self.back_pointers[self.goal] = None
 
     def calculate_rhs(self, node):
-        def lookahead_cost(neighbour):
-            return self.g(neighbour) + self.graph.cost(neighbour, node)
-
-        lowest_cost_neighbour = min(self.graph.neighbors(node), key=lookahead_cost)
+        lowest_cost_neighbour = self.lowest_cost_neighbour(node)
         self.back_pointers[node] = lowest_cost_neighbour
-        return lookahead_cost(lowest_cost_neighbour)
+        return self.lookahead_cost(node, lowest_cost_neighbour)
+
+    def lookahead_cost(self, node, neighbour):
+        return self.g(neighbour) + self.graph.cost(neighbour, node)
+
+    def lowest_cost_neighbour(self, node):
+        cost = partial(self.lookahead_cost, node)
+        return min(self.graph.neighbors(node), key=cost)
 
     def g(self, node):
         return self.G_VALS.get(node, float('inf'))
@@ -108,12 +113,6 @@ class DStarLite(object):
                 self.compute_shortest_path()
             yield self.position, observation, self.graph.walls
 
-    def lowest_cost_neighbour(self, node):
-        """TODO: Refactor above to use this"""
-        def lookahead_cost(neighbour):
-            return self.g(neighbour) + self.graph.cost(neighbour, node)
-
-        return min(self.graph.neighbors(node), key=lookahead_cost)
 
 
 if __name__ == "__main__":
