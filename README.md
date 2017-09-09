@@ -17,6 +17,9 @@ To generate GIFs, install [imagemagick](https://www.imagemagick.org/) (Mac: `bre
 3. `pip install -e .` in the top directory of the cloned repo
 4. `cd pydstarlite; python dstarlite.py`
 
+## Wiki
+- [Understanding the differences between LPA* and D*](https://github.com/samdjstephens/pydstarlite/wiki/Understanding-the-differences-between-LPA*-and-D*-Lite)
+
 ## Credit
 
 - Original paper: http://idm-lab.org/bib/abstracts/papers/aaai02b.pdf
